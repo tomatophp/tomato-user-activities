@@ -42,7 +42,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "TomatoPHP\\TomatoUserActivities\\AdvancedLoggerServiceProvider"
+                "TomatoPHP\\TomatoUserActivities\\TomatoUserActivitiesServiceProvider"
             ]
         },
         "branch-alias": {
