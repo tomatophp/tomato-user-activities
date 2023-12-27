@@ -2,38 +2,62 @@
     <x-slot:header>
         {{ __('Activity') }}
     </x-slot:header>
+    <x-slot:buttons>
+        <x-tomato-admin-button danger confirm :href="route('admin.activities.clear')" type="link">
+            {{__('Clear Activity')}}
+        </x-tomato-admin-button>
+    </x-slot:buttons>
+    <x-slot:icon>
+        bx bx-history
+    </x-slot:icon>
 
-    <div class="pb-12" v-cloak>
+    <div class="pb-12">
         <div class="mx-auto">
             <x-splade-table :for="$table" striped>
-                <x-splade-cell actions>
-                    <div class="flex justify-start">
-                        <Link href="/admin/activities/{{ $item->id }}" class="px-2 text-blue-500" slideover>
-                        <div class="flex justify-start space-x-2">
-                            <x-heroicon-s-eye class="h-4 w-4 ltr:mr-2 rtl:ml-2"/>
-                            <span>{{trans('tomato-admin::global.crud.view')}}</span>
+                <x-splade-cell user>
+                    <x-splade-link class="text-primary-500" href="{{route('admin.activities.show', $item->id)}}" modal>
+                        {{ $item->account()->first()->name }}
+                    </x-splade-link>
+                </x-splade-cell>
+                <x-splade-cell user_agent>
+                    @php
+                        $agent = new \Jenssegers\Agent\Agent();
+                        $agent->setUserAgent($item->user_agent);
+                    @endphp
+                    <div class="flex flex-col gap-4">
+                        <div class="text-md flex justify-start gap-2">
+                            <div class="flex flex-col justify-center items-center">
+                                <i class="bx bx-link"></i>
+                            </div>
+                            <div>
+                                <b>{{ $item->method }}</b>
+                                {{ $item->url }}
+                            </div>
                         </div>
-                        </Link>
-                        <Link href="/admin/activities/{{ $item->id }}/edit" class="px-2 text-yellow-400" slideover>
-                        <div class="flex justify-start space-x-2">
-                            <x-heroicon-s-pencil class="h-4 w-4 ltr:mr-2 rtl:ml-2"/>
-                            <span>{{trans('tomato-admin::global.crud.edit')}}</span>
+                        <div class="text-md flex justify-start gap-2">
+                            <div class="flex flex-col justify-center items-center">
+                                <i class="bx bx-globe"></i>
+                            </div>
+                            <div>
+                                {{ $item->remote_address }}
+                            </div>
                         </div>
-                        </Link>
-                        <Link href="/admin/activities/{{ $item->id }}"
-                              confirm="{{trans('tomato-admin::global.crud.delete-confirm')}}"
-                              confirm-text="{{trans('tomato-admin::global.crud.delete-confirm-text')}}"
-                              confirm-button="{{trans('tomato-admin::global.crud.delete-confirm-button')}}"
-                              cancel-button="{{trans('tomato-admin::global.crud.delete-confirm-cancel-button')}}"
-                              class="px-2 text-red-500"
-                              method="delete"
-
-                        >
-                        <div class="flex justify-start space-x-2">
-                            <x-heroicon-s-trash class="h-4 w-4 ltr:mr-2 rtl:ml-2"/>
-                            <span>{{trans('tomato-admin::global.crud.delete')}}</span>
+                        <div class="text-md flex justify-start gap-2">
+                            <div class="flex flex-col justify-center items-center">
+                                <i class="bx bxs-user"></i>
+                            </div>
+                            <div>
+                                {{ $agent->device() }}, {{  $agent->platform() }} [{{$agent->version($agent->platform())}}], {{ $agent->browser() }}[{{$agent->version($agent->browser())}}]
+                            </div>
                         </div>
-                        </Link>
+                        <div class="text-md flex justify-start gap-2">
+                            <div class="flex flex-col justify-center items-center">
+                                <i class="bx bxs-time"></i>
+                            </div>
+                            <div>
+                                {{ $item->created_at->diffForHumans() }}
+                            </div>
+                        </div>
                     </div>
                 </x-splade-cell>
             </x-splade-table>

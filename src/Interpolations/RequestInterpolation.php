@@ -3,6 +3,7 @@
 namespace TomatoPHP\TomatoUserActivities\Interpolations;
 
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
@@ -10,6 +11,7 @@ use Illuminate\Support\Str;
  */
 class RequestInterpolation extends BaseInterpolation
 {
+
     /**
      * @param string $text
      * @return string
@@ -22,6 +24,7 @@ class RequestInterpolation extends BaseInterpolation
             preg_match("/{\s*(.+?)\s*}(\r?\n)?/", $variable, $matches);
             if (isset($matches[1])) {
                 $value = $this->escape($this->resolveVariable($matches[0], $matches[1]));
+                $this->logCollection->put($matches[1], $value);
                 $text = str_replace($matches[0], $value, $text);
             }
         }

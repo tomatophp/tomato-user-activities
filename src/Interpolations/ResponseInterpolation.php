@@ -23,6 +23,7 @@ class ResponseInterpolation extends BaseInterpolation
             if (isset($matches[1])) {
                 $value = $this->escape($this->resolveVariable($matches[0], $matches[1]));
                 $text = str_replace($matches[0], $value, $text);
+                $this->logCollection->put($matches[1], $value);
             }
         }
         return $text;

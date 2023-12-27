@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use ProtoneMedia\Splade\AbstractTable;
 use ProtoneMedia\Splade\Facades\Toast;
 use ProtoneMedia\Splade\SpladeTable;
+use Illuminate\Database\Eloquent\Builder;
 
 class ActivityTable extends AbstractTable
 {
@@ -14,9 +15,7 @@ class ActivityTable extends AbstractTable
      *
      * @return void
      */
-    public function __construct(
-        public mixed $query = null
-    )
+    public function __construct(public mixed $query=null)
     {
         if(!$query){
             $this->query = \TomatoPHP\TomatoUserActivities\Models\Activity::query();
@@ -30,12 +29,7 @@ class ActivityTable extends AbstractTable
      */
     public function authorize(Request $request)
     {
-        if(auth('web')->user()){
-            return auth('web')->user()->can('admin.activaites.index');
-        }
-        else {
-            return true;
-        }
+        return true;
     }
 
     /**
@@ -57,33 +51,38 @@ class ActivityTable extends AbstractTable
     public function configure(SpladeTable $table)
     {
         $table
-            ->withGlobalSearch(label: trans('tomato-admin::global.search'),columns: ['id','account.name',])
+            ->withGlobalSearch(
+                label: trans('tomato-admin::global.search'),
+                columns: ['id',]
+            )
             ->bulkAction(
                 label: trans('tomato-admin::global.crud.delete'),
                 each: fn (\TomatoPHP\TomatoUserActivities\Models\Activity $model) => $model->delete(),
                 after: fn () => Toast::danger(__('Activity Has Been Deleted'))->autoDismiss(2),
                 confirm: true
             )
-            ->export()
-            ->defaultSort('id')
+            ->selectFilter(
+                key: 'model_id',
+                label: __('Account'),
+                remote_url: route('admin.accounts.api')
+            )
+            ->defaultSort('id', 'desc')
             ->column(
                 key: 'id',
                 label: __('Id'),
-                sortable: true)
+                sortable: true
+            )
             ->column(
-                key: 'account.name',
-                label: __('Account'),
-                sortable: true,
-                searchable: true)
+                key: 'user',
+                label: __('User'),
+                sortable: true
+            )
             ->column(
-                key: 'type',
-                label: __('Type'),
-                sortable: true)
-            ->column(
-                key: 'log',
-                label: __('Log'),
-                sortable: true)
-            ->column(key: 'actions',label: trans('tomato-admin::global.crud.actions'))
-            ->paginate(15);
+                key: 'user_agent',
+                label: __('User agent'),
+                sortable: true
+            )
+            ->export()
+            ->paginate(10);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace TomatoPHP\TomatoUserActivities;
 
+use TomatoPHP\TomatoAdmin\Facade\TomatoMenu;
+use TomatoPHP\TomatoAdmin\Services\Contracts\Menu;
 use TomatoPHP\TomatoUserActivities\Providers\EventServiceProvider;
 use TomatoPHP\TomatoUserActivities\Services\Benchmark;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -15,11 +17,11 @@ class TomatoUserActivitiesServiceProvider extends ServiceProvider
     use DispatchesJobs;
 
     /**
-     * Bootstrap any application services.
+     * Register any application services.
      *
      * @return void
      */
-    public function boot(): void
+    public function register(): void
     {
         //Register generate command
         $this->commands([
@@ -61,17 +63,30 @@ class TomatoUserActivitiesServiceProvider extends ServiceProvider
         //Register Routes
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
 
-        $this->app->register(EventServiceProvider::class);
+
+        $this->mergeConfigFrom(__DIR__ . '/../config/tomato-user-activities.php', 'tomato-user-activities');
+        Benchmark::start(config('tomato-user-activities.request.benchmark', 'application'));
+
+
     }
 
     /**
-     * Register any application services.
+     * Bootstrap any application services.
      *
      * @return void
      */
-    public function register(): void
+    public function boot(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/tomato-user-activities.php', 'tomato-user-activities');
-        Benchmark::start(config('tomato-user-activities.request.benchmark', 'application'));
+
+        $this->app->register(EventServiceProvider::class);
+
+        TomatoMenu::register([
+            Menu::make()
+                ->group(__('CRM'))
+                ->label(__('User Activities'))
+                ->route('admin.activities.index')
+                ->icon('bx bx-history')
+        ]);
     }
+
 }

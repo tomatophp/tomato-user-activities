@@ -2,6 +2,7 @@
 
 namespace TomatoPHP\TomatoUserActivities\Interpolations;
 
+use Illuminate\Support\Collection;
 use TomatoPHP\TomatoUserActivities\Contracts\InterpolationContract;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
  */
 abstract class BaseInterpolation implements InterpolationContract
 {
+    protected Collection $logCollection;
+
     /**
      * @var Request
      */
@@ -19,6 +22,16 @@ abstract class BaseInterpolation implements InterpolationContract
      * @var Response
      */
     protected $response;
+
+    public function __construct()
+    {
+        $this->logCollection = collect([]);
+    }
+
+    public function getLogger(): Collection
+    {
+        return $this->logCollection;
+    }
 
     /**
      * @param Request $request

@@ -2,18 +2,21 @@
 
 namespace TomatoPHP\TomatoUserActivities\Services;
 
+use Illuminate\Support\Collection;
 use TomatoPHP\TomatoUserActivities\Interpolations\RequestInterpolation;
 use TomatoPHP\TomatoUserActivities\Interpolations\ResponseInterpolation;
 use TomatoPHP\TomatoUserActivities\Loggers\RequestLogger;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Arr;
+use TomatoPHP\TomatoUserActivities\Models\Activity;
 
 /**
  * Class RequestLoggerService
  */
 class RequestLoggerService
 {
+    protected Collection $collectLog;
     /**
      *
      */
@@ -57,6 +60,7 @@ class RequestLoggerService
         $this->logger = $logger;
         $this->requestInterpolation = $requestInterpolation;
         $this->responseInterpolation = $responseInterpolation;
+        $this->collectLog = collect([]);
     }
 
     /**
@@ -74,7 +78,32 @@ class RequestLoggerService
             $format = Arr::get($this->formats, $format, $format);
 
             $message = $this->responseInterpolation->interpolate($format);
+
+            $this->collectLog->push($this->responseInterpolation->getLogger()->toArray());
+
             $message = $this->requestInterpolation->interpolate($message);
+
+            $this->collectLog->push($this->requestInterpolation->getLogger()->toArray());
+
+            $logArray = array_merge($this->collectLog->toArray()[0], $this->collectLog->toArray()[1]);
+
+            if(in_array('auth:accounts', $request->route()->middleware()) && $request->user('accounts')){
+                Activity::create([
+                    'model_id' => $request->user()->id,
+                    'model_type' => config('tomato-crm.model'),
+                    'request_hash' => $logArray['request-hash'],
+                    'response_time' => $logArray['response-time'],
+                    'status' => $logArray['status'],
+                    'method' => $logArray['method'],
+                    'url' => $logArray['url'],
+                    'referer' => $logArray['referer'],
+                    'query' => $logArray['query'],
+                    'remote_address' =>$logArray['remote-addr'],
+                    'user_agent' => $request->userAgent(),
+                    'level' => config('tomato-user-activities.request.level', 'info'),
+                    'user' => $logArray['user'],
+                ]);
+            }
 
             $this->logger->log(config('tomato-user-activities.request.level', 'info'), $message, [
                 static::LOG_CONTEXT
