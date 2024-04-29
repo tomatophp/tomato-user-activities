@@ -21,8 +21,7 @@
         "illuminate/support": "^9.0|^10.0|^11.0",
         "illuminate/http": "^9.0|^10.0|^11.0",
         "monolog/monolog": "^2.9|^3.6",
-        "ext-json": "*",
-        "jenssegers/agent": "*"
+        "ext-json": "*"
     },
     "require-dev": {
         "laravel/framework": "^9.0|^10.0|^11.0",
